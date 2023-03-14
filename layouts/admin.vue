@@ -19,7 +19,7 @@
               <i :class="mi.icon"></i>
             </template>
             <template #title>{{ mi.title }}</template>
-            <a-menu-item  v-for="miChild in mi.children" :key="miChild.key">
+            <a-menu-item v-for="miChild in mi.children" :key="miChild.key">
               <NuxtLink :to="miChild.link">
                 {{ miChild.title }}
               </NuxtLink>
@@ -38,6 +38,9 @@
 </template>
 
 <script setup lang="ts">
+
+import {ADMIN_MENU, MenuItem} from "~/layouts/menu.admin";
+
 useHead({
   script: [
     {src: 'https://kit.fontawesome.com/2d0edabe59.js', crossorigin: 'anonymous'},
@@ -45,82 +48,22 @@ useHead({
 });
 
 const route = useRoute()
-const menu = ref<MenuItem[]>([
-  {
-    key: '1', title: 'Dashboard',
-    icon: 'fas fa-tachometer-alt',
-    link: '/admin',
+const menu = ref<MenuItem[]>(ADMIN_MENU);
+const selectedKeys = computed({
+  get() {
+    return [findMenuItem(menu.value, route.path)?.key]
   },
-  {
-    key: '2', title: 'Categories',
-    link: '/admin/categories',
-    icon: 'fas fa-boxes'
-  },
-  {
-    key: '3', title: 'Products',
-    link: '/admin/products',
-    icon: 'fas fa-box'
-  },
-  {
-    key: '4', title: 'Orders',
-    link: '/admin/orders',
-    icon: 'fas fa-coins',
-  },
-  {
-    key: '5', title: 'Homepage',
-    link: '/admin/cms/homepage',
-    icon: 'fas fa-laptop-house'
-  },
-  {
-    key: '6', title: 'Landing pages',
-    link: '/admin/cms/homepage',
-    icon: 'fas fa-pager'
-  },
-  {
-    key: '7', title: 'Media',
-    link: '/admin/cms/media',
-    icon: 'fas fa-photo-video'
-  },
-  {
-    key: '8', title: 'Articles',
-    link: '/admin/cms/articles',
-    icon: 'fas fa-newspaper'
-  },
-  {
-    key: '9', title: 'Seeding',
-    link: '/admin/cms/seeding',
-    icon: 'fas fa-seedling'
-  },
-  {
-    key: '10', title: 'Accounts',
-    link: '/admin/accounts',
-    icon: 'fas fa-users'
-  },
-  {
-    key: '11', title: 'Settings',
-    icon: 'fas fa-cogs',
-    children: [
-      {
-        key: '12', title: 'Footer',
-        link: '/admin/settings/about',
-      },
-      {
-        key: '13', title: 'Contacts',
-        link: '/admin/settings/about',
-      },
-    ],
-  },
-]);
-const selectedKeys = computed(() => {
-  return menu.value.filter(mi => route.path == mi.link).map(mi => mi.key)
+  set() {
+    //
+  }
 });
 
-interface MenuItem {
-  key: string;
-  title: string;
-  icon?: string;
-  link?: string;
-  children?: MenuItem[];
+function findMenuItem(menuItems: MenuItem[], routePath: string): MenuItem | undefined {
+  return menuItems.map(mi => {
+    if (mi.link == routePath) return mi
+    if (!!mi.children) return findMenuItem(mi.children, routePath)
+    return undefined;
+  }).find(mi => !!mi)
 }
 </script>
 
